@@ -296,7 +296,9 @@ function setArea(i,{byUser=false,ping=false}={}){
   resolveBg(a,url=>{showEl.style.backgroundImage=`url(${url})`;showEl.classList.add('on');hideEl.classList.remove('on');});
   document.querySelectorAll('.tab').forEach((t,k)=>{t.classList.toggle('on',k===i);
     if(k===i&&ping){t.classList.remove('pinged');void t.offsetWidth;t.classList.add('pinged');
-      t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});}});
+      /* center the tab by scrolling ONLY the tabs strip — scrollIntoView here
+         would also grab the page scroller and cancel any in-flight anchor scroll */
+      const tb=$('tabs');tb.scrollTo({left:t.offsetLeft-(tb.clientWidth-t.offsetWidth)/2,behavior:'smooth'});}});
   $('scTitle').textContent=a.title; $('scText').textContent=a.text;
   $('scLinks').innerHTML=a.links.map(([l,h])=>
     `<a class="chip" href="${h}"${h.startsWith('http')?' target="_blank" rel="noopener"':''}>${l}</a>`).join('');
@@ -324,22 +326,29 @@ function routeTranscript(text){
   if(t===lastText&&now-lastTextAt<2500)return;   // duplicate event from another channel
   lastText=t;lastTextAt=now;
   $('caption').textContent='“'+String(text).slice(-140)+'”';
+  let goAnchor=null;
   for(const it of INTENTS)
     if(it.kw.some(k=>t.includes(k))&&now-lastScroll>30000){
-      lastScroll=now;
-      document.getElementById(it.anchor).scrollIntoView({behavior:'smooth'});
-      break;
+      lastScroll=now; goAnchor=it.anchor; break;
     }
-  if(now<autofollowPauseUntil)return;            // visitor clicked a tab recently
-  if(now-lastAreaSwitch<6000)return;             // don't flip more than every 6s
-  const tail=t.slice(-170);                      // judge only the newest words
-  let best=-1,bestPos=-1;
-  for(let i=0;i<AREAS.length;i++)
-    for(const k of AREAS[i].kw){
-      const p=tail.lastIndexOf(k);
-      if(p>bestPos){bestPos=p;best=i}            // most recently mentioned topic wins
-    }
-  if(best>=0&&best!==cur){lastAreaSwitch=now;setArea(best,{ping:true})}
+  if(now>=autofollowPauseUntil&&now-lastAreaSwitch>=6000){ // don't flip more than every 6s
+    const tail=t.slice(-170);                    // judge only the newest words
+    let best=-1,bestPos=-1;
+    for(let i=0;i<AREAS.length;i++)
+      for(const k of AREAS[i].kw){
+        const p=tail.lastIndexOf(k);
+        if(p>bestPos){bestPos=p;best=i}          // most recently mentioned topic wins
+      }
+    if(best>=0&&best!==cur){lastAreaSwitch=now;setArea(best,{ping:true})}
+  }
+  /* Page scroll starts LAST — after any tab ping — so no other smooth scroll
+     can cancel it (mobile browsers abort an in-flight scroll when a new
+     scrollIntoView touches the page scroller). */
+  if(goAnchor){
+    const el=document.getElementById(goAnchor);
+    setTimeout(()=>{try{el.scrollIntoView({behavior:'smooth',block:'start'})}
+      catch(e){el.scrollIntoView(true)}},120);
+  }
 }
 
 
