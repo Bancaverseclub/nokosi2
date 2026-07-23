@@ -306,6 +306,9 @@ function setArea(i,{byUser=false,ping=false}={}){
   $('thumbs').innerHTML=a.photos.map((p,k)=>`<div class="thumb ${k?'':'on'}" onclick="setPhoto(${k})"><img src="${p}"></div>`).join('');
   photoIdx=0; clearInterval(photoTimer); photoTimer=setInterval(()=>setPhoto((photoIdx+1)%a.photos.length),6000);
   if(byUser)autofollowPauseUntil=Date.now()+20000;
+  /* Membership tab = the intake: clicking it also takes you to the form */
+  if(byUser&&a.key==='membership')
+    setTimeout(()=>document.getElementById('inquire').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
 function setPhoto(k){photoIdx=k;
   document.querySelectorAll('#album img').forEach((im,i)=>im.classList.toggle('on',i===k));
