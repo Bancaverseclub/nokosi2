@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOKOSI — Meet Your Ambassador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#211D17; --cream:#F6F1E8; --gold:#C8AE6E; --olive:#9A8756; --scrim:rgba(15,12,7,.55);
+    --serif:'Cormorant Garamond',Georgia,serif; --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:#A6925D}
+  html,body{max-width:100%;overflow-x:clip}
+  body{font-family:var(--sans);color:var(--cream);
+    /* black at the top, fading into gold just after the hero */
+    background:linear-gradient(180deg,#0d0b07 0%,#0d0b07 52vh,#3a301f 88vh,#6d5e38 108vh,#9A8756 130vh,#A6925D 100%)}
+  img{max-width:100%}
+  a{text-decoration:none}
+
+  /* ── top nav ── */
+  .nav{display:flex;align-items:center;justify-content:space-between;background:transparent;
+    padding:16px max(18px,calc((100vw - 1080px)/2))} /* aligns nav content with the 1080px hero */
+  .brand{display:flex;align-items:center;gap:12px;color:var(--cream)}
+  .laurel{width:36px;height:36px;border:1.4px solid var(--cream);border-radius:50%;
+    display:grid;place-items:center;font-family:var(--serif);font-size:19px}
+  .brand b{font-family:var(--serif);font-weight:600;font-size:24px;letter-spacing:.42em}
+  .nav-r{display:flex;align-items:center;gap:26px}
+  .nav-r a{color:var(--cream);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.85}
+  .nav-r a:hover{opacity:1}
+  .nav-r a.cta{border:1px solid rgba(246,241,232,.6);padding:10px 16px;opacity:1}
+
+  /* ── hero stage ── */
+  .stage{position:relative;width:min(1080px,calc(100vw - 68px));aspect-ratio:16/9;overflow:hidden;background:#0F0C07;
+    margin:22px auto 0;border-radius:22px;box-shadow:0 26px 64px rgba(20,16,9,.4)}
+  .bg{position:absolute;inset:0;background-size:cover;background-position:center;
+    opacity:0;transition:opacity 1.8s ease}
+  .bg.on{opacity:1}
+  .stage::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(100deg,rgba(15,12,7,.55) 0%,rgba(15,12,7,.15) 45%,transparent 65%);pointer-events:none}
+
+  .avatar-wrap{position:absolute;left:60%;bottom:0;transform:translateX(-25%);
+    height:67%;aspect-ratio:576/720;z-index:2}
+  .avatar-wrap img.idle{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom}
+  .avatar-wrap video{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none}
+  .avatar-wrap canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom}
+
+  .hero-copy{position:absolute;z-index:5;left:44px;top:50%;transform:translateY(-50%);max-width:380px}
+  .hero-laurel{width:48px;height:48px;border:1.6px solid var(--cream);border-radius:50%;
+    display:grid;place-items:center;font-family:var(--serif);font-size:30px;margin-bottom:18px;opacity:.95}
+  .hero-copy .kicker{font-size:10px;letter-spacing:.34em;color:var(--cream);opacity:.85;text-transform:uppercase;margin-bottom:14px}
+  .hero-copy h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3.2vw,44px);
+    line-height:1.08;letter-spacing:.04em;text-transform:uppercase}
+  .hero-copy h1 em{font-style:normal;color:var(--gold)}
+  .hero-copy p{margin-top:16px;font-size:12.5px;line-height:1.65;opacity:.9;max-width:330px}
+
+  .actions{margin-top:30px}
+  .act.primary{cursor:pointer;display:block;width:280px;border:1px solid rgba(246,241,232,.35);
+    background:rgba(162,136,78,.88);color:#fff;font-size:15px;font-family:var(--sans);text-align:center;
+    padding:18px 24px;border-radius:12px;backdrop-filter:blur(6px);transition:all .2s}
+  .act.primary:hover{filter:brightness(1.12)}
+
+  .caption{position:absolute;z-index:4;left:56px;bottom:30px;max-width:min(480px,60%);
+    color:var(--cream);font-family:var(--serif);font-size:17px;font-style:italic;
+    text-shadow:0 1px 8px rgba(0,0,0,.7);min-height:24px;text-align:left}
+  .livepill{position:absolute;z-index:6;top:16px;right:20px;display:none;align-items:center;gap:7px;
+    padding:6px 13px;border-radius:999px;background:rgba(15,12,7,.55);backdrop-filter:blur(4px);
+    color:#fff;font-size:10px;font-weight:700;letter-spacing:.1em}
+  .livepill i{width:7px;height:7px;border-radius:50%;background:#E0574F;animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,87,79,.5)}50%{box-shadow:0 0 0 6px rgba(224,87,79,0)}}
+
+  /* ── area tabs: outlined rectangles on the gold field ── */
+  .tabs{display:flex;gap:16px;overflow-x:auto;padding:34px 0 8px;max-width:1080px;margin:0 auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:1 0 150px;cursor:pointer;border:1px solid rgba(246,241,232,.55);background:transparent;
+    color:var(--cream);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+    padding:17px 10px;border-radius:6px;transition:all .25s;font-family:var(--sans)}
+  .tab.on{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+  .tab.pinged{animation:ping .9s ease 2}
+  @keyframes ping{0%,100%{box-shadow:0 0 0 0 rgba(246,241,232,0)}50%{box-shadow:0 0 0 6px rgba(246,241,232,.35)}}
+
+  /* ── showcase on the gold field ── */
+  .showcase{max-width:1080px;margin:0 auto;padding:30px 0 26px;display:grid;
+    grid-template-columns:1.1fr .9fr;gap:44px;align-items:center}
+  .album{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:4/3.4;background:#3d3524;
+    border:3px solid rgba(246,241,232,.9);box-shadow:0 20px 50px rgba(20,16,9,.30)}
+  .album img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease}
+  .album img.on{opacity:1}
+  .sc-copy h2{font-family:var(--sans);font-weight:800;font-size:clamp(34px,3.6vw,52px);color:#EFE3C0;margin-bottom:16px}
+  .sc-copy p{font-size:13.5px;line-height:1.75;color:#F2ECDD;opacity:.92}
+  .sc-links{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+  .chip{cursor:pointer;border:1px solid rgba(246,241,232,.7);color:var(--cream);background:transparent;
+    font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:11px 17px;border-radius:4px;transition:all .2s;font-family:var(--sans)}
+  .chip:hover{background:var(--cream);color:var(--ink)}
+  .thumbs{max-width:1080px;margin:0 auto;padding:0 0 56px;display:flex;gap:12px;flex-wrap:wrap}
+  .thumb{width:104px;height:74px;border-radius:9px;overflow:hidden;cursor:pointer;opacity:.75;
+    border:2px solid rgba(246,241,232,.35);transition:all .2s}
+  .thumb.on{opacity:1;border-color:var(--cream)}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+
+  /* ── inquire: cream section, form left, watercolor map faded on the right ── */
+  .inquire{position:relative;background:#F2EDE2;color:var(--ink);padding:64px 34px;overflow:hidden}
+  .inquire::after{content:"";position:absolute;top:0;right:0;bottom:0;width:58%;pointer-events:none;
+    background:url('nokosi-map.jpg') right center/cover no-repeat;opacity:.85;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 32%);mask-image:linear-gradient(90deg,transparent 0,#000 32%)}
+  .inq-grid{position:relative;z-index:1;max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,620px) 1fr;gap:36px;align-items:stretch}
+  .inq-grid>*{min-width:0;max-width:100%}
+  .form-card{background:#FFFDF9;border-radius:12px;padding:34px;box-shadow:0 12px 34px rgba(33,29,23,.10)}
+  .form-card .k{font-size:10px;letter-spacing:.26em;color:#A2884E;text-transform:uppercase}
+  .form-card h3{font-family:var(--serif);font-weight:600;font-size:28px;margin:6px 0 4px}
+  .form-card .sub{font-size:12.5px;color:#6E6456;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fld{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .fld span{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#6E6456}
+  .fld input,.fld textarea{width:100%;min-width:0;border:1px solid #E0D6C4;border-radius:5px;background:#fff;padding:11px 12px;font:inherit;font-size:13.5px}
+  .seg{display:flex;gap:8px;margin-bottom:12px}
+  .seg button{flex:1;cursor:pointer;padding:12px;font-size:12px;letter-spacing:.08em;border-radius:5px;
+    border:1px solid #E0D6C4;background:#FFFDF9;color:#6E6456;transition:all .2s}
+  .seg button.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+  .submit{width:100%;cursor:pointer;background:var(--ink);color:var(--cream);border:0;border-radius:5px;
+    padding:15px;font-size:12px;letter-spacing:.22em;text-transform:uppercase}
+  .fineprint{text-align:center;font-size:11px;color:#8a7f6e;margin-top:10px}
+
+  footer{background:#171410;color:#B9AE9C;text-align:center;padding:40px 22px;font-size:12px;line-height:1.9}
+  footer .wm{font-family:var(--serif);letter-spacing:.34em;font-size:20px;color:var(--cream)}
+  footer a{color:var(--gold)}
+
+  /* ── mobile ── */
+  @media (max-width:860px){
+    .nav{padding:14px 18px}
+    .nav-r a:not(.cta){display:none}
+    .brand img[alt="NOKOSI"]{width:96px!important;height:15px!important}
+    .nav-r a.cta{white-space:nowrap;font-size:9px}
+    /* mobile: square hero 86vw; every section shares that same width */
+    .nav{padding:14px 7vw}
+    .stage{width:86vw;aspect-ratio:1/1;margin:14px auto;min-height:0}
+    .bg{background-position:center 78%}
+    .hero-laurel,.hero-copy .kicker,.hero-copy h1,.hero-copy p{display:none}
+    /* single button pinned to the bottom of the hero square */
+    .hero-copy{top:auto;bottom:14px;left:14px;right:14px;transform:none;max-width:none}
+    .actions{margin:0}
+    .act.primary{width:100%;padding:16px;font-size:13.5px}
+    .avatar-wrap{left:50%;transform:translateX(-50%);width:80%;height:80%;aspect-ratio:auto;bottom:0}
+    .caption{left:18px;right:18px;bottom:76px;max-width:none;text-align:center;font-size:13px}
+    .tabs{width:86vw;padding:22px 0 4px}
+    .tab{flex:0 0 auto;padding:14px 20px}
+    .showcase{grid-template-columns:1fr;width:86vw;padding:22px 0;gap:24px}
+    .thumbs{width:86vw;padding:0 0 40px}
+    /* mobile: form centered, map as faint full-width wash behind it */
+    .inq-grid{grid-template-columns:1fr;justify-items:center}
+    .inquire{padding:44px 7vw 60px}
+    .inquire::after{width:100%;opacity:.35;-webkit-mask-image:none;mask-image:none}
+    .form-card{padding:24px;width:100%;max-width:560px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="brand"><img src="nokosi-symbol (1).svg" alt="" style="width:34px;height:34px"><img src="nokosi-logo-1.svg" alt="NOKOSI" style="height:20px;width:129px"></div>
+  <div class="nav-r">
+    <a href="#">The Club</a><a href="#">The Film</a><a href="#">Gallery</a>
+    <a href="https://bancaverse.com/call" target="_blank" rel="noopener">Schedule Call</a>
+    <a class="cta" href="#inquire">Request Invitation</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO STAGE ═══ -->
+<section class="stage" id="stage">
+  <div class="bg" id="bgA"></div>
+  <div class="bg" id="bgB"></div>
+
+  <div class="hero-copy">
+    <img class="hero-laurel" src="nokosi-symbol (1).svg" alt="" style="border:0;width:58px;height:58px">
+    <div class="kicker">You are invited!</div>
+    <h1>An invitation<br>to <em>belong.</em></h1>
+    <p>NOKOSI Palm Beach is a private members' club and a Jack Nicklaus Signature course —
+       a small circle of families who quietly call this place their own.</p>
+    <div class="actions">
+      <button class="act primary" id="talkBtn">Start AI Ambassador</button>
+    </div>
+  </div>
+
+  <div class="avatar-wrap" id="avatarWrap">
+    <img class="idle" id="idleImg" alt="Your NOKOSI Ambassador"
+      src="https://files2.heygen.ai/avatar/v3/da5cba6bc7b34c5ea139f77da98fdc04_55370/preview_talk_1.webp">
+  </div>
+
+  <span class="livepill" id="livePill"><i></i>LIVE · <span id="clock">0:00</span></span>
+  <div class="caption" id="caption"></div>
+</section>
+
+<!-- ═══ AREA TABS ═══ -->
+<nav class="tabs" id="tabs"></nav>
+
+<!-- ═══ SHOWCASE ═══ -->
+<section class="showcase">
+  <div class="album" id="album"></div>
+  <div class="sc-copy">
+    <h2 id="scTitle"></h2>
+    <p id="scText"></p>
+    <div class="sc-links" id="scLinks"></div>
+  </div>
+</section>
+<div class="thumbs" id="thumbs"></div>
+
+<!-- ═══ INQUIRE ═══ -->
+<section class="inquire" id="inquire">
+  <div class="inq-grid">
+    <div class="form-card">
+      <div class="k">Membership inquiry</div>
+      <h3>Request an invitation</h3>
+      <div class="sub">Membership is limited and by invitation. Share a few details and our membership office will reach out personally.</div>
+      <form onsubmit="this.innerHTML='<p style=&quot;font-family:Cormorant Garamond,serif;font-size:22px&quot;>Thank you — we review every inquiry personally and reply within two business days.</p>';return false">
+        <div class="grid2">
+          <label class="fld"><span>First name</span><input required></label>
+          <label class="fld"><span>Last name</span><input required></label>
+        </div>
+        <label class="fld"><span>E-mail</span><input type="email" required></label>
+        <div class="grid2">
+          <label class="fld"><span>Phone</span><input></label>
+          <label class="fld"><span>State</span><input value="Florida"></label>
+        </div>
+        <div class="seg">
+          <button type="button" class="on" onclick="this.classList.add('on');this.nextElementSibling.classList.remove('on')">Family</button>
+          <button type="button" onclick="this.classList.add('on');this.previousElementSibling.classList.remove('on')">Individual</button>
+        </div>
+        <label class="fld"><span>A note (optional)</span><textarea rows="3" placeholder="Tell us a little about yourself, or who referred you."></textarea></label>
+        <button class="submit">Submit inquiry</button>
+        <div class="fineprint">We review every inquiry personally and reply within two business days.<br>
+          Prefer to talk first? <a href="https://bancaverse.com/call" target="_blank" rel="noopener" style="color:#A2884E">Schedule a call</a>.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wm">NOKOSI</div>
+  Lantana, Florida · Groundbreaking late 2025 · Opening for play fall 2026<br>
+  To request an invitation and materials: Steve Brauner · <a href="tel:+13058904570">(305) 890-4570</a> ·
+  <a href="mailto:sbrauner@nokosipalmbeach.com">sbrauner@nokosipalmbeach.com</a>
+</footer>
+
+<script>
+/* ═════════ CONTENT MODEL — swap photos/links freely; no code below needs changes ═════════ */
+/* 5 areas per the NOKOSI brochure. Photos/backgrounds come from ./ */
+const B=f=>''+f;
+const AREAS=[
+ {key:'golf',label:'Golf',kw:['golf','course','nicklaus','tee','fairway','championship','18th','signature'],
+  title:'A Jack Nicklaus Signature Course',
+  text:'A design incorporating decades of competitive insight, with multiple tee complexes accommodating all skill levels and strategy inspired by Jack’s major-championship experience. Walking-friendly routing through Florida’s natural landscape.',
+  photos:[B('the-land.png'),B('golf-range.png')],
+  links:[['See in brochure','https://nokosipalmbeach.com/wp-content/uploads/2026/04/NOKOSI-BROCHURE_10mar26.pdf'],['Schedule call','https://bancaverse.com/call']]},
+ {key:'range',label:'Range & Rangehouse',kw:['rangehouse','range house','driving range','range','practice','short game','swing'],
+  title:'The Range & Rangehouse',
+  text:'A driving range positioned for optimal length, sun, and wind, beside a southern-lodge Rangehouse — open kitchen and bar, wide overhangs, shaded terraces. Whether you’re starting your day on the course or practicing your swing, a space to gather, dine, and unwind.',
+  photos:[B('golf-range.png'),B('range-house.jpg')],
+  links:[['See in brochure','https://nokosipalmbeach.com/wp-content/uploads/2026/04/NOKOSI-BROCHURE_10mar26.pdf'],['Schedule call','https://bancaverse.com/call']]},
+ {key:'clubhouse',label:'Clubhouse',kw:['clubhouse','club house','restaurant','dining','chef','cuisine','wine','cocktail','members bar','members’ bar','event','pro shop'],
+  title:'The Clubhouse',
+  text:'An architectural masterpiece featuring an acclaimed chef-driven restaurant, a sophisticated members’ bar with craft cocktails and a curated wine program, expansive event venues for milestone celebrations, a curated pro shop, and state-of-the-art practice facilities.',
+  photos:[B('the-clubhouse.png'),B('clubhouse-bar.jpg')],
+  links:[['See in brochure','https://nokosipalmbeach.com/wp-content/uploads/2026/04/NOKOSI-BROCHURE_10mar26.pdf'],['Schedule call','https://bancaverse.com/call']]},
+ {key:'wellness',label:'Wellness',kw:['wellness','spa','longevity','health','diagnostic','therapies','performance'],
+  title:'Health, Wellness & Longevity',
+  text:'A physician-led health lab with a fully integrated wellness and longevity spa: comprehensive diagnostics, advanced preventative screening, regenerative therapies, and personalized performance programs focused on extending our members’ health.',
+  photos:[B('spa.jpg')],
+  links:[['See in brochure','https://nokosipalmbeach.com/wp-content/uploads/2026/04/NOKOSI-BROCHURE_10mar26.pdf'],['Schedule call','https://bancaverse.com/call']]},
+ {key:'membership',label:'Membership',kw:['member','invitation','join','apply','steve','brauner','waitlist','belong'],
+  title:'By Invitation Only',
+  text:'A community defined by intention — a carefully assembled circle of leaders, thinkers, and visionaries united by a shared vision for a world-class golf experience. If you wish to be considered, we invite you to express your interest today.',
+  photos:[B('cabins.jpg'),B('the-land.png')],
+  links:[['Request an invitation','#inquire'],['Schedule a call','https://bancaverse.com/call'],['Email Steve','mailto:sbrauner@nokosipalmbeach.com']]},
+];
+const TOKEN_URL="https://taqusvwpwxacoolcsaaj.supabase.co/functions/v1/liveavatar-token";
+
+/* ═════════ background + tabs + showcase ═════════ */
+let cur=-1, bgFlip=false, autofollowPauseUntil=0, photoIdx=0, photoTimer=null;
+const $=id=>document.getElementById(id);
+/* Local background folder: drop clubhouse.jpg, golf.jpg, wellness.jpg, dining.jpg,
+   rangehouse.jpg, membership.jpg (or .png) into ./ — they win
+   automatically; missing files fall back to the stock photo. */
+const FALLBACK='https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&w=1600&q=70';
+function resolveBg(a,cb){
+  const tries=[a.photos[0],FALLBACK];
+  (function next(n){if(n>=tries.length-1)return cb(tries[tries.length-1]);
+    const im=new Image();im.onload=()=>cb(tries[n]);im.onerror=()=>next(n+1);im.src=tries[n];})(0);
+}
+function setArea(i,{byUser=false,ping=false}={}){
+  if(i===cur)return; cur=i; const a=AREAS[i];
+  const showEl=bgFlip?$('bgA'):$('bgB'), hideEl=bgFlip?$('bgB'):$('bgA'); bgFlip=!bgFlip;
+  resolveBg(a,url=>{showEl.style.backgroundImage=`url(${url})`;showEl.classList.add('on');hideEl.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach((t,k)=>{t.classList.toggle('on',k===i);
+    if(k===i&&ping){t.classList.remove('pinged');void t.offsetWidth;t.classList.add('pinged');
+      t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});}});
+  $('scTitle').textContent=a.title; $('scText').textContent=a.text;
+  $('scLinks').innerHTML=a.links.map(([l,h])=>
+    `<a class="chip" href="${h}"${h.startsWith('http')?' target="_blank" rel="noopener"':''}>${l}</a>`).join('');
+  $('album').innerHTML=a.photos.map((p,k)=>`<img src="${p}" class="${k?'':'on'}">`).join('');
+  $('thumbs').innerHTML=a.photos.map((p,k)=>`<div class="thumb ${k?'':'on'}" onclick="setPhoto(${k})"><img src="${p}"></div>`).join('');
+  photoIdx=0; clearInterval(photoTimer); photoTimer=setInterval(()=>setPhoto((photoIdx+1)%a.photos.length),6000);
+  if(byUser)autofollowPauseUntil=Date.now()+20000;
+}
+function setPhoto(k){photoIdx=k;
+  document.querySelectorAll('#album img').forEach((im,i)=>im.classList.toggle('on',i===k));
+  document.querySelectorAll('.thumb').forEach((t,i)=>t.classList.toggle('on',i===k));}
+$('tabs').innerHTML=AREAS.map((a,i)=>`<button class="tab" onclick="setArea(${i},{byUser:true})">${a.label}</button>`).join('');
+setArea(0); // open on the golf course
+
+const INTENTS=[
+  {kw:['schedule a call','schedule call','book a call','set up a call','request an invitation',
+       'request more information','more information','express your interest','express interest',
+       'inquiry form','fill out the form','apply for membership','membership tab','take you to the right section'],anchor:'inquire'},
+];
+let lastScroll=0,lastAreaSwitch=0,lastText='',lastTextAt=0;
+function routeTranscript(text){
+  if(!text)return;
+  const now=Date.now();
+  const t=String(text).toLowerCase();
+  if(t===lastText&&now-lastTextAt<2500)return;   // duplicate event from another channel
+  lastText=t;lastTextAt=now;
+  $('caption').textContent='“'+String(text).slice(-140)+'”';
+  for(const it of INTENTS)
+    if(it.kw.some(k=>t.includes(k))&&now-lastScroll>30000){
+      lastScroll=now;
+      document.getElementById(it.anchor).scrollIntoView({behavior:'smooth'});
+      break;
+    }
+  if(now<autofollowPauseUntil)return;            // visitor clicked a tab recently
+  if(now-lastAreaSwitch<6000)return;             // don't flip more than every 6s
+  const tail=t.slice(-170);                      // judge only the newest words
+  let best=-1,bestPos=-1;
+  for(let i=0;i<AREAS.length;i++)
+    for(const k of AREAS[i].kw){
+      const p=tail.lastIndexOf(k);
+      if(p>bestPos){bestPos=p;best=i}            // most recently mentioned topic wins
+    }
+  if(best>=0&&best!==cur){lastAreaSwitch=now;setArea(best,{ping:true})}
+}
+
+
+/* ═════════ live avatar (chroma-keyed Katya) ═════════ */
+const VERT="attribute vec2 p;varying vec2 t;void main(){t=vec2((p.x+1.)/2.,1.-(p.y+1.)/2.);gl_Position=vec4(p,0.,1.);}";
+const FRAG="precision mediump float;varying vec2 t;uniform sampler2D f;uniform vec3 k;void main(){vec4 c=texture2D(f,t);float d=distance(c.rgb,k);gl_FragColor=vec4(c.rgb,smoothstep(0.30,0.38,d));}";
+function makeKeyer(cv){const gl=cv.getContext('webgl',{premultipliedAlpha:false});if(!gl)return null;
+  const sh=(ty,s)=>{const x=gl.createShader(ty);gl.shaderSource(x,s);gl.compileShader(x);return x};
+  const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,VERT));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,FRAG));
+  gl.linkProgram(p);gl.useProgram(p);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const l=gl.getAttribLocation(p,'p');gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
+  const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
+  [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(u=>gl.texParameteri(gl.TEXTURE_2D,u,gl.CLAMP_TO_EDGE));
+  [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(u=>gl.texParameteri(gl.TEXTURE_2D,u,gl.LINEAR));
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  return{gl,p,key:null,pr:document.createElement('canvas').getContext('2d',{willReadFrequently:true})};}
+let SDK=null;const preload=()=>SDK||(SDK=import("https://esm.sh/@heygen/liveavatar-web-sdk@0.0.18"));
+setTimeout(preload,2500);
+
+let session=null,ac=null,secs=0,timers=[],starting=false;
+async function startLive(){
+  if(session||starting)return;starting=true;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume()}catch(e){}
+  $('talkBtn').textContent='Connecting…';$('talkBtn').disabled=true;
+  try{
+    const mod=await preload();
+    const r=await fetch(TOKEN_URL,{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
+    const j=await r.json(); if(!j.session_token)throw new Error(j.error||'no token');
+    const wrap=$('avatarWrap');
+    const video=document.createElement('video');video.muted=true;video.playsInline=true;wrap.appendChild(video);
+    const canvas=document.createElement('canvas');wrap.appendChild(canvas);
+    const K=makeKeyer(canvas);
+    session=new mod.LiveAvatarSession(j.session_token,{voiceChat:true});
+    const evReady=(mod.SessionEvent&&mod.SessionEvent.SESSION_STREAM_READY)||'session.stream_ready';
+    session.on(evReady,()=>{try{session.attach(video)}catch(e){}});
+    const seen=new Set();
+    [mod.SessionEvent,mod.AgentEventsEnum,mod.VoiceChatEvent].forEach(en=>{if(!en)return;
+      Object.values(en).forEach(ev=>{if(typeof ev!=='string'||seen.has(ev))return;seen.add(ev);
+        try{session.on(ev,(pl)=>{const tx=pl&&(pl.text||pl.message||pl.transcript||(pl.data&&(pl.data.text||pl.data.message)));
+          if(typeof tx==='string'&&tx.trim())routeTranscript(tx);})}catch(e){}});});
+    await session.start();
+    let tries=0;const iv=setInterval(()=>{if(video.srcObject){clearInterval(iv);
+        video.play().catch(()=>{});
+        try{if(!video.dataset.a){video.dataset.a='1';ac.createMediaStreamSource(video.srcObject).connect(ac.destination)}}catch(e){}
+      }else{try{session.attach(video)}catch(e){};if(++tries>24)clearInterval(iv)}},500);timers.push(iv);
+    (function draw(){if(!session)return;
+      if(video.readyState>=2&&video.videoWidth){
+        if(canvas.width!==video.videoWidth){canvas.width=video.videoWidth;canvas.height=video.videoHeight}
+        if(K){if(!K.key){K.pr.canvas.width=8;K.pr.canvas.height=8;K.pr.drawImage(video,0,0,40,40,0,0,8,8);
+            const d=K.pr.getImageData(0,0,8,8).data;K.key=[d[0]/255,d[1]/255,d[2]/255];
+            $('idleImg').style.display='none';$('livePill').style.display='inline-flex';
+            $('talkBtn').textContent='Close Session';$('talkBtn').disabled=false;}
+          const gl=K.gl;gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,video);
+          gl.uniform3fv(gl.getUniformLocation(K.p,'k'),K.key||[.5,.5,.5]);
+          gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}}
+      requestAnimationFrame(draw)})();
+    secs=0;const ck=setInterval(()=>{secs++;$('clock').textContent=`${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+      if(secs>=290)endLive()},1000);timers.push(ck);
+  }catch(e){alert('Could not start the live session: '+e.message);endLive()}
+  starting=false;
+}
+function endLive(){
+  try{session&&session.stop()}catch(e){}session=null;starting=false;timers.forEach(clearInterval);timers=[];
+  document.querySelectorAll('#avatarWrap video,#avatarWrap canvas').forEach(n=>n.remove());
+  $('idleImg').style.display='';$('livePill').style.display='none';
+  $('caption').textContent='';$('talkBtn').textContent='Start AI Ambassador';$('talkBtn').disabled=false;
+}
+$('talkBtn').onclick=()=>{ session?endLive():startLive() };
+addEventListener('pagehide',()=>{try{session&&session.stop()}catch(e){}});
+</script>
+</body>
+</html>
